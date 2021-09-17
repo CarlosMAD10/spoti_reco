@@ -123,11 +123,10 @@ def elbow_graph(df):
         return 0
 
 def silhouette_graph(df):
-        K = range(2, 41, 2)
+        K = range(2, 21, 2)
         silhouette = []
 
         for k in K:
-
 
                 time0 = time()
                 kmeans = KMeans(n_clusters=k,
@@ -135,9 +134,11 @@ def silhouette_graph(df):
                 scaler = StandardScaler()
                 pipe = make_pipeline(scaler, kmeans)
                 pipe.fit(df)
-                time_trained = time()- time0
-                print(f"Trained a K-Means model with {k} neighbours! Time needed = {time_trained:.3f} seconds.")
                 silhouette.append(silhouette_score(df, pipe.predict(df)))
+                time_trained = time()- time0
+
+                print(f"Calculated silhouette with {k} neighbours! Time needed = {time_trained:.3f} seconds.")
+
 
 
         plt.figure(figsize=(16,8))
@@ -153,16 +154,16 @@ def main():
         modeling_df = df.drop(columns=["song_name", "song_id", "artist_name", "artist_id"])
         
         #elbow_graph(modeling_df)
-        silhouette_graph(modeling_df)
-        #visualise_model(modeling_df, n_clusters=10)
+        #silhouette_graph(modeling_df)
+        #visualise_model(modeling_df, n_clusters=15)
 
-        #model, inertia, fit_time = create_model(modeling_df, n_clusters=15)
+        model, inertia, fit_time = create_model(modeling_df, n_clusters=20)
 
-        #save_model(model, path="music_model.pkl")
+        save_model(model, path="music_model.pkl")
 
-        #kmeans_model = model[-1]
+        kmeans_model = model[-1]
 
-        #print(f"Results for {kmeans_model}: inertia = {inertia:.2f}; fit_time = {fit_time:.3f}")
+        print(f"Results for {kmeans_model}: inertia = {inertia:.2f}; fit_time = {fit_time:.3f}")
 
         return 0
 

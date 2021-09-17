@@ -16,7 +16,7 @@ def import_top_songs(path="top_songs.csv"):
     
     return top_df
 
-def import_spotify_df(path="spotify_df.csv"):
+def import_spotify_df(path="spotify_songs.csv"):
     df = pd.read_csv(path, index_col=0)
     df["song_name"] = df["song_name"].apply(lambda x: x.lower())
     df["artist_name"] = df["artist_name"].apply(lambda x: x.lower())
@@ -93,14 +93,15 @@ def choice(options, df, sp, names_or_ids="ids"):
 
 def recommend_top_song(song_name, df):
     while True:  # Loop so we don't recommend the same song the user inputs.
-        random_row = random.choice(range(len(top_df)))
+        random_row = random.choice(range(len(df)))
         random_song = df.iloc[random_row, 0]
         random_artist = df.iloc[random_row, 1]
 
-        if random_song.lower() != song_name[0]:
+        if random_song != song_name:
             break
 
-    print(f"TOP recommendation! A similar song to {song_name.capitalize()} that you might like is {random_song}, by {random_artist}.")
+    print(f"TOP recommendation! A similar song to {song_name.capitalize()} that you might \
+like is {random_song.capitalize()}, by {random_artist.capitalize()}.")
 
     return {"song_name":random_song, "artist_name":random_artist}
 
@@ -122,14 +123,13 @@ def recommend_spotify_song(song_id, df, model, sp_connection):
         row = pd.DataFrame(data=attributes, index=modeling_df.columns)
         recommendation_cluster = model.predict(row)[0]
 
-
-    recommendation_df = names_ids_df.loc[names_ids_df["cluster"] == recommendation_cluster,
-     ["song_name", "artist_name", "artist_id", "song_id", "cluster"]]
+    mask = names_ids_df["cluster"] == recommendation_cluster
+    recommendation_df = names_ids_df.loc[mask, ["song_name", "artist_name", "artist_id", "song_id", "cluster"]]
 
     random_row = random.choice(range(len(recommendation_df)))
 
-    song_rec_name = names_ids_df.iloc[random_row, 0]
-    song_rec_artist = names_ids_df.iloc[random_row, 2]
+    song_rec_name = names_ids_df.iloc[random_row, 0].capitalize()
+    song_rec_artist = names_ids_df.iloc[random_row, 2].capitalize()
     song_rec_id = names_ids_df.iloc[random_row, 1]
 
     print(f"Spotify recommendation! A song you might like is {song_rec_name}, by {song_rec_artist}! ")
@@ -144,7 +144,7 @@ def song_recommender(n = 5):
 
     #We load the two datasets: top songs and spotify songs
     top_df = import_top_songs(path="top_songs.csv")
-    spotify_df = import_spotify_df(path="triple_extended.csv")
+    spotify_df = import_spotify_df(path="spotify_songs.csv")
 
     #We load the model that we will use
     model = clustering_music.load_model(path="music_model.pkl")
@@ -170,18 +170,21 @@ def song_recommender(n = 5):
         possible_tracks = spotify_helper_functions.find_possible_songs(user_input,sp)
         if possible_tracks:
             song_choice_id = choice(list(possible_tracks.values()), spotify_df, sp)
-            spoti_recommended = recommend_spotify_song(song_choice_id, spotify_df, model, sp)
+            for _ in range(n):
+                spoti_recommended = recommend_spotify_song(song_choice_id, spotify_df, model, sp)
             return 0
         else:
             print("Sorry, we didn't find any matches in Spotify")
 
     elif len(spoti_song) == 1:
-        spoti_recommended = recommend_spotify_song(spoti_song[0], spotify_df, model, sp)
+        for _ in range(n):
+            spoti_recommended = recommend_spotify_song(spoti_song[0], spotify_df, model, sp)
         return 0
     
     else:
         song_choice_id = choice(spoti_song, spotify_df, sp)
-        spoti_recommended = recommend_spotify_song(song_choice_id, spotify_df, model, sp)
+        for _ in range(n):
+            spoti_recommended = recommend_spotify_song(song_choice_id, spotify_df, model, sp)
         return 0
 
 

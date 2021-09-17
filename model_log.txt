@@ -1,0 +1,5 @@
+--------------
+Model saved - KMeans(n_clusters=15, n_init=4, random_state=0)
+Inertia = 593105.86
+2021-09-17 11:45h
+Filename: music_model.pkl

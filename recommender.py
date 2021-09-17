@@ -83,7 +83,7 @@ def choice(options, df, sp, names_or_ids="ids"):
             print(f"Option {index + 1} - {song_name} by {artist_name}")
         while True:
                 try:
-                    choice = int(input("Selection:"))
+                    choice = int(input("Selection: "))
                     if choice >= 1 and choice <= len(options):
                         return options[choice-1]
                 except:
@@ -166,7 +166,9 @@ def song_recommender(n = 5):
     #2. If the song is not in the top list, we search in the spotify_df
     spoti_song = is_spotify_song(user_input, spotify_df)
 
+    #If we didn't find it in the dataframe
     if spoti_song == []:
+        print("No matches found in our songs database! Searching Spotify for options.")
         possible_tracks = spotify_helper_functions.find_possible_songs(user_input,sp)
         if possible_tracks:
             song_choice_id = choice(list(possible_tracks.values()), spotify_df, sp)
@@ -175,13 +177,17 @@ def song_recommender(n = 5):
             return 0
         else:
             print("Sorry, we didn't find any matches in Spotify")
-
+    #If we found one match in the dataframe
     elif len(spoti_song) == 1:
+        song_id = spoti_song[0]
+        song_info = spotify_helper_functions.get_song_info(song_id, sp)
+        print(f"One match found in our songs database! {song_info[0].capitalize()}, by {song_info[1].capitalize()}")
         for _ in range(n):
             spoti_recommended = recommend_spotify_song(spoti_song[0], spotify_df, model, sp)
         return 0
-    
+    #If we found more than one match
     else:
+        print("Several matches found in our songs database!")
         song_choice_id = choice(spoti_song, spotify_df, sp)
         for _ in range(n):
             spoti_recommended = recommend_spotify_song(song_choice_id, spotify_df, model, sp)

@@ -2,12 +2,12 @@ import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 import json
 
-def spotify_connection():
+def spotify_connection(path=r"C:\Users\carlo\OneDrive\Programming\spotify.txt"):
         """
         Function that returns the Spotify client object. 
         """
         try:
-                with open(r"C:\Users\carlo\OneDrive\Programming\spotify.txt") as file:
+                with open(path) as file:
                         client_id = file.readline().strip()
                         client_secret = file.readline().strip()
         except:
